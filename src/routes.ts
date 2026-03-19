@@ -27,7 +27,7 @@ router.get("/users", async (_req, res) => {
 
 // Registration
 router.post('/register', async (req, res) => {
-  const { email, password, fullName } = req.body;
+  const { email, password, full_name } = req.body;
   if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
 
   try {
@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
     // insert user
     const result = await pool.query(
       'INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id, email, full_name',
-      [email, hashedPassword, fullName]
+      [email, hashedPassword, full_name]
     );
 
     const user = result.rows[0];
