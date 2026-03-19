@@ -1,6 +1,6 @@
 // src/routes.ts
 import { Router } from "express";
-import pool from "./db";
+import pool from "./db.js";
 
 const router = Router();
 

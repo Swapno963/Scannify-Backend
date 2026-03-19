@@ -1,6 +1,6 @@
 import express from "express";
-import pool from "./db";
-import routes from "./routes";
+import pool from "./db.js";
+import routes from "./routes.js";
 
 const app = express();
 app.use(express.json());

@@ -2,8 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
+
   "scripts": {
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm src/server.ts'",
     "build": "tsc",
     "start": "node dist/server.js",
     "migrate": "node-pg-migrate up"
