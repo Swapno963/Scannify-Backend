@@ -114,7 +114,7 @@ router.get('/scaning_info/:userId', async (req, res) => {
   try {
 
     // returning all the scan info of a user
-    const result = await pool.query('SELECT * FROM scan_info WHERE user_id=$1', [userId]);
+    const result = await pool.query('SELECT * FROM scan_info WHERE user_id=$1 ORDER BY timestamp DESC', [userId]);
     
     const scan_info = result.rows;
     res.status(200).json({ scan_info });
