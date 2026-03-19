@@ -106,3 +106,23 @@ router.post('/scaning_info', async (req, res) => {
 });
 
 
+// get Scan info of a user
+router.get('/scaning_info/:userId', async (req, res) => {
+  const userId = parseInt(req.params.userId);
+  if (!userId) return res.status(400).json({ message: 'User_id is  required' });
+
+  try {
+
+    // returning all the scan info of a user
+    const result = await pool.query('SELECT * FROM scan_info WHERE user_id=$1', [userId]);
+    
+    const scan_info = result.rows;
+    res.status(200).json({ scan_info });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+export default router;
