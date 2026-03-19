@@ -71,13 +71,13 @@ router.post('/login', async (req, res) => {
     const secret = process.env.JWT_SECRET;
     if (!secret) throw new Error('JWT_SECRET missing in .env');
 
-    // SignJWT (v9+ safe)
+    // SignJWT 
     const token = await new SignJWT({ id: user.id, email: user.email })
       .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
       .setExpirationTime(process.env.JWT_EXPIRES_IN || '1d')
       .sign(new TextEncoder().encode(secret));
 
-    res.json({ token });
+    res.json({ "user_id":user.id,"email": user.email ,"token":token });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
