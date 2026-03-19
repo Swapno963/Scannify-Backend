@@ -3,8 +3,9 @@ import { Router } from "express";
 import pool from "./db.js";
 import bcrypt from 'bcrypt';
 import { Secret } from 'jsonwebtoken';
-import { SignJWT } from 'jose'; // <-- v9+ uses 'jose' style
+import { SignJWT } from 'jose'; 
 import dotenv from 'dotenv';
+import {authenticate} from './middleware/auth.js';
 dotenv.config();
 
 const router = Router();
@@ -82,4 +83,26 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-export default router;
+
+// Creating Scan info
+router.post('/scaning_info', async (req, res) => {
+  const { user_id, value, barcode_type,timestamp,device_info } = req.body;
+  if (!user_id || !value || !barcode_type || !timestamp || !device_info) return res.status(400).json({ message: 'User_id, value, barcode_type,timestamp and device_info required' });
+
+  try {
+
+    // insert user
+    const result = await pool.query(
+      'INSERT INTO scan_info (user_id, value, barcode_type,timestamp,device_info ) VALUES ($1, $2, $3, $4, $5) RETURNING id, user_id, value, barcode_type,timestamp,device_info ',
+      [user_id, value, barcode_type,timestamp,device_info ]
+    );
+
+    const scan_info = result.rows[0];
+    res.status(201).json({ scan_info });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
