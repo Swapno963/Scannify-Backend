@@ -125,4 +125,45 @@ router.get('/scaning_info/:userId', async (req, res) => {
 });
 
 
+router.get('/dashboard', authenticate, async (req, res) => {
+  try {
+    const userId = (req as any).user.id; // from JWT
+
+    const query = `
+      WITH scans_per_day AS (
+        SELECT 
+          date_trunc('day', timestamp) AS scan_date,
+          COUNT(*) AS total_scans
+        FROM scan_info
+        WHERE user_id = $1
+        GROUP BY scan_date
+        ORDER BY scan_date DESC
+      ),
+      top_codes AS (
+        SELECT 
+          value,
+          COUNT(*) AS scan_count
+        FROM scan_info
+        WHERE user_id = $1
+        GROUP BY value
+        ORDER BY scan_count DESC
+        LIMIT 10
+      )
+      SELECT 
+        (SELECT json_agg(scans_per_day) FROM scans_per_day) AS scans_per_day,
+        (SELECT json_agg(top_codes) FROM top_codes) AS top_codes;
+    `;
+
+    const result = await pool.query(query, [userId]);
+
+    res.status(200).json({
+      scansPerDay: result.rows[0].scans_per_day || [],
+      topCodes: result.rows[0].top_codes || []
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 export default router;
