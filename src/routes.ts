@@ -52,5 +52,34 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Login
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body;
 
+  if (!email || !password)
+    return res.status(400).json({ message: 'Email and password required' });
+
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE email=$1', [email]);
+    const user = result.rows[0];
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET missing in .env');
+
+    // SignJWT (v9+ safe)
+    const token = await new SignJWT({ id: user.id, email: user.email })
+      .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
+      .setExpirationTime(process.env.JWT_EXPIRES_IN || '1d')
+      .sign(new TextEncoder().encode(secret));
+
+    res.json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 export default router;
